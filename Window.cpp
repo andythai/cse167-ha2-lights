@@ -158,12 +158,6 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 void Window::idle_callback()
 {
 	// Call the update function
-	/*
-	if (!showDragon && !showBear && !showBunny) {
-		cube->update();
-	}
-	*/
-
 	if (showBunny) {
 		bunny->update();
 	}
@@ -225,10 +219,8 @@ glm::vec3 Window::trackball_translate(float x, float y)    // Use separate x and
 	d = (float)v.length();    // this is the distance from the trackball's origin to the mouse location, without considering depth (=in the plane of the trackball's origin)
 	d = (d<1.0) ? d : 1.0f;   // this limits d to values of 1.0 or less to avoid square roots of negative values in the following line
 	v.z = sqrtf(1.001 - d*d);  // this calculates the Z coordinate of the mouse position on the trackball, based on Pythagoras: v.z*v.z + d*d = 1*1
-	//v = normalize(v); // Still need to normalize, since we only capped d, not v.
 	v.x = v.x * 19.5;
 	v.y = v.y * 12.5;
-	//std::cout << "x: " << v.x << ", v.y: " << v.y << std::endl;
 	return v;  // return the mouse location on the surface of the trackball
 }
 
@@ -277,7 +269,7 @@ void Window::cursor_callback(GLFWwindow* window, double xpos, double ypos)
 		if (velocity > 0.0001) {
 			glm::vec3 rot_axis;
 			rot_axis = cross(old_location, location);
-			velocity = velocity / (1.25);
+			velocity = velocity / (2.25);
 			rot_axis[2] = 0.0f;
 			glm::vec4 new_pos = glm::rotate(glm::mat4(1.0f), velocity / 180.0f * glm::pi<float>(), rot_axis) * glm::vec4(light.p_position, 1.0f);
 			light.p_position.x = new_pos.x;
@@ -295,7 +287,7 @@ void Window::cursor_callback(GLFWwindow* window, double xpos, double ypos)
 		if (velocity > 0.0001) {
 			glm::vec3 rot_axis;
 			rot_axis = cross(old_location, location);
-			velocity = velocity / (1.25);
+			velocity = velocity / (3.0f);
 			rot_axis[2] = 0.0f;
 			glm::vec4 new_pos = glm::rotate(glm::mat4(1.0f), velocity / 180.0f * glm::pi<float>(), rot_axis) * glm::vec4(light.s_position, 1.0f);
 			light.s_position.x = new_pos.x;
@@ -304,6 +296,23 @@ void Window::cursor_callback(GLFWwindow* window, double xpos, double ypos)
 		}
 	}
 
+	// Change spot light size
+	else if (button_down && rmb && LIGHT_MODE && SPOT) {
+		glm::vec3 location = trackball(cursor_x, cursor_y);
+		glm::vec3 direction = location - old_location;
+		float velocity = direction.length();
+		if (velocity > 0.0001) {
+			velocity = velocity / 10.0f;
+			if (direction.y < 0 && ((light.cutOff - velocity) > 0.0f) && ((light.outerCutOff - velocity) > 0.0f)) {
+				light.cutOff = light.cutOff - velocity;
+				light.outerCutOff = light.outerCutOff - velocity;
+			}
+			else if (direction.y > 0) {
+				light.cutOff = light.cutOff + velocity;
+				light.outerCutOff = light.outerCutOff + velocity;
+			}
+		}
+	}
 
 	// Translate object
 	else if (rmb && button_down && !LIGHT_MODE) {
@@ -368,24 +377,10 @@ void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	}
 
 	else if (LIGHT_MODE && SPOT) {
-		if (!rmb) {
 			if (yoffset > 0)
 				light.setSPos(light.s_position.x, light.s_position.y, light.s_position.z - 1);
 			else if (yoffset < 0)
 				light.setSPos(light.s_position.x, light.s_position.y, light.s_position.z + 1);
-		}
-		/*
-		else if (button_down && rmb) {
-			if (yoffset > 0) {
-				light.cutOff = light.cutOff - 1;
-				light.outerCutOff = light.outerCutOff - 1;
-			}
-			else if (yoffset < 0) {
-				light.cutOff = light.cutOff + 1;
-				light.outerCutOff = light.outerCutOff + 1;
-			}
-		}
-		*/
 	}
 }
 
@@ -646,17 +641,22 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 		// R RESET
 		else if (key == GLFW_KEY_R)
 		{
-			if (showBunny)
-			{
-				bunny->reset();
+			if (mods == GLFW_MOD_SHIFT) {
+				light = Light();
 			}
-			else if (showDragon)
-			{
-				dragon->reset();
-			}
-			else if (showBear)
-			{
-				bear->reset();
+			else {
+				if (showBunny)
+				{
+					bunny->reset();
+				}
+				else if (showDragon)
+				{
+					dragon->reset();
+				}
+				else if (showBear)
+				{
+					bear->reset();
+				}
 			}
 		}
 		else if (key == GLFW_KEY_0) {
@@ -690,12 +690,13 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			light.lights_on = 1;
 		}
 	}
+
 	else if (key == GLFW_KEY_E && LIGHT_MODE && SPOT) {
 		if (mods == GLFW_MOD_SHIFT)
-			light.attenuation += 0.005f;
-		else if (light.attenuation - 0.005f > 0.0f)
-			light.attenuation = light.attenuation - 0.005f;
+			light.attenuation += 0.01f;
+		else if (light.attenuation - 0.01f > 0.015f)
+			light.attenuation = light.attenuation - 0.01f;
 		else
-			light.attenuation = 0.001;
+			light.attenuation = 0.015;
 	}
 }
