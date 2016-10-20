@@ -37,8 +37,8 @@ void Light::update(GLuint shaderProgram)
 	glUniform3f(glGetUniformLocation(shaderProgram, "spotLight.diffuse"), 0.8f, 0.8f, 0.0f);
 	glUniform3f(glGetUniformLocation(shaderProgram, "spotLight.specular"), 0.8f, 0.8f, 0.8f);
 	glUniform1f(glGetUniformLocation(shaderProgram, "spotLight.quadratic"), attenuation);
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotLight.cutOff"), glm::cos(glm::radians(cutOff)));
-	glUniform1f(glGetUniformLocation(shaderProgram, "spotLight.outerCutOff"), glm::cos(glm::radians(outerCutOff)));
+	glUniform1f(glGetUniformLocation(shaderProgram, "spotLight.cutOff"), cos_cutOff);
+	glUniform1f(glGetUniformLocation(shaderProgram, "spotLight.outerCutOff"), cos_outerCutOff);
 }
 
 void Light::setPos(float x, float y, float z)

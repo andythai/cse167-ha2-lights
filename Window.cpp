@@ -1,5 +1,6 @@
 #include "window.h"
 
+
 const char* window_title = "GLFW Starter Project";
 Cube * cube;
 GLint shaderProgram;
@@ -294,6 +295,7 @@ void Window::cursor_callback(GLFWwindow* window, double xpos, double ypos)
 			light.s_position.y = new_pos.y;
 			light.s_position.z = new_pos.z;
 		}
+		//std::cout << light.s_position.x << ", " << light.s_position.y << ", " << light.s_position.z << std::endl;
 	}
 
 	// Change spot light size
@@ -306,10 +308,14 @@ void Window::cursor_callback(GLFWwindow* window, double xpos, double ypos)
 			if (direction.y < 0 && ((light.cutOff - velocity) > 0.0f) && ((light.outerCutOff - velocity) > 0.0f)) {
 				light.cutOff = light.cutOff - velocity;
 				light.outerCutOff = light.outerCutOff - velocity;
+				light.cos_cutOff = pow(glm::cos(glm::radians(light.cutOff)), light.cos_exp);
+				light.cos_outerCutOff = pow(glm::cos(glm::radians(light.outerCutOff)), light.cos_exp);
 			}
 			else if (direction.y > 0) {
 				light.cutOff = light.cutOff + velocity;
 				light.outerCutOff = light.outerCutOff + velocity;
+				light.cos_cutOff = pow(glm::cos(glm::radians(light.cutOff)), light.cos_exp);
+				light.cos_outerCutOff = pow(glm::cos(glm::radians(light.outerCutOff)), light.cos_exp);
 			}
 		}
 	}
@@ -692,11 +698,31 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 	}
 
 	else if (key == GLFW_KEY_E && LIGHT_MODE && SPOT) {
-		if (mods == GLFW_MOD_SHIFT)
+		if (mods == GLFW_MOD_SHIFT) {
+			if (light.cos_exp >= 128)
+				light.cos_exp = 128;
+			else {
+				light.cos_exp = light.cos_exp * 2;
+				light.cos_cutOff = pow(glm::cos(glm::radians(light.cutOff)), light.cos_exp);
+				light.cos_outerCutOff = pow(glm::cos(glm::radians(light.outerCutOff)), light.cos_exp);
+			}
+		}
+		else {
+			if (light.cos_exp <= 1) {
+				light.cos_exp = 1;
+			}
+			else {
+				light.cos_exp = light.cos_exp / 2;
+				light.cos_cutOff = pow(glm::cos(glm::radians(light.cutOff)), light.cos_exp);
+				light.cos_outerCutOff = pow(glm::cos(glm::radians(light.outerCutOff)), light.cos_exp);
+			}
+		}
+			/*
 			light.attenuation += 0.01f;
 		else if (light.attenuation - 0.01f > 0.015f)
 			light.attenuation = light.attenuation - 0.01f;
 		else
 			light.attenuation = 0.015;
+			*/
 	}
 }
