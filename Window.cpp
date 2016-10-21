@@ -703,7 +703,7 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 				light.cos_exp = 128;
 			else {
 				light.cos_exp = light.cos_exp * 2;
-				light.cos_cutOff = pow(glm::cos(glm::radians(light.cutOff)), light.cos_exp);
+				//light.cos_cutOff = pow(glm::cos(glm::radians(light.cutOff)), light.cos_exp);
 				light.cos_outerCutOff = pow(glm::cos(glm::radians(light.outerCutOff)), light.cos_exp);
 			}
 		}
@@ -713,16 +713,9 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			}
 			else {
 				light.cos_exp = light.cos_exp / 2;
-				light.cos_cutOff = pow(glm::cos(glm::radians(light.cutOff)), light.cos_exp);
+				//light.cos_cutOff = pow(glm::cos(glm::radians(light.cutOff)), light.cos_exp);
 				light.cos_outerCutOff = pow(glm::cos(glm::radians(light.outerCutOff)), light.cos_exp);
 			}
 		}
-			/*
-			light.attenuation += 0.01f;
-		else if (light.attenuation - 0.01f > 0.015f)
-			light.attenuation = light.attenuation - 0.01f;
-		else
-			light.attenuation = 0.015;
-			*/
 	}
 }
